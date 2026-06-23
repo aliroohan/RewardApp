@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useCallback } from 'react';
 import { useParams } from 'react-router-dom';
 import { toast } from 'sonner';
 import { api } from '../lib/api';
@@ -27,7 +27,7 @@ export function CashbackQr() {
   const [data, setData] = useState<CashoutQrData | null>(null);
   const [loading, setLoading] = useState(true);
 
-  const fetchData = async () => {
+  const fetchData = useCallback(async () => {
     if (!receiptId) return;
     try {
       const [receiptsRes, qrRes] = await Promise.all([
@@ -41,11 +41,11 @@ export function CashbackQr() {
     } finally {
       setLoading(false);
     }
-  };
+  }, [receiptId]);
 
   useEffect(() => {
     fetchData();
-  }, [receiptId]);
+  }, [fetchData]);
 
   const handleDownload = () => {
     if (!data?.cashoutQrUrl) return;

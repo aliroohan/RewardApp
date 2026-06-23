@@ -1,4 +1,4 @@
-import { createContext, useContext, useEffect, useState } from 'react';
+import { createContext, useContext, useEffect, useState, useCallback } from 'react';
 import type { ReactNode } from 'react';
 import { api } from '../lib/api';
 import type { LoginResponse, User } from '../lib/api';
@@ -26,6 +26,7 @@ interface RegisterData {
   province?: string;
   preferredStore?: string;
   accountType?: 'household' | 'company' | 'trade';
+  profession?: string;
   privacyConsent?: boolean;
   marketingConsent?: boolean;
   termsConsent?: boolean;
@@ -38,6 +39,35 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const [token, setToken] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(true);
 
+  const logout = useCallback(() => {
+    localStorage.removeItem('userToken');
+    setToken(null);
+    setUser(null);
+    setIsLoading(false);
+  }, []);
+
+  const refreshUser = useCallback(
+    async (currentToken?: string) => {
+      try {
+        const t = currentToken || token || localStorage.getItem('userToken');
+        if (!t) {
+          setUser(null);
+          setIsLoading(false);
+          return;
+        }
+        const res = await api.get('/me', {
+          headers: { Authorization: `Bearer ${t}` },
+        });
+        setUser(res.data);
+      } catch {
+        logout();
+      } finally {
+        setIsLoading(false);
+      }
+    },
+    [token, logout]
+  );
+
   useEffect(() => {
     const storedToken = localStorage.getItem('userToken');
     if (storedToken) {
@@ -46,26 +76,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     } else {
       setIsLoading(false);
     }
-  }, []);
-
-  const refreshUser = async (currentToken?: string) => {
-    try {
-      const t = currentToken || token || localStorage.getItem('userToken');
-      if (!t) {
-        setUser(null);
-        setIsLoading(false);
-        return;
-      }
-      const res = await api.get('/me', {
-        headers: { Authorization: `Bearer ${t}` },
-      });
-      setUser(res.data);
-    } catch {
-      logout();
-    } finally {
-      setIsLoading(false);
-    }
-  };
+  }, [refreshUser]);
 
   const login = async (email: string, password: string) => {
     const res = await api.post<LoginResponse>('/auth/login', { email, password });
@@ -90,13 +101,6 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     setUser(data.user);
   };
 
-  const logout = () => {
-    localStorage.removeItem('userToken');
-    setToken(null);
-    setUser(null);
-    setIsLoading(false);
-  };
-
   return (
     <AuthContext.Provider
       value={{
@@ -116,6 +120,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   );
 }
 
+// eslint-disable-next-line react-refresh/only-export-components
 export function useAuth() {
   const ctx = useContext(AuthContext);
   if (!ctx) throw new Error('useAuth must be used within AuthProvider');

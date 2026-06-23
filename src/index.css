@@ -69,8 +69,8 @@ body {
 h1,
 h2 {
   font-family: var(--heading);
-  font-weight: 500;
-  color: var(--text-h);
+  font-weight: 700;
+  /* color intentionally NOT set here – use Tailwind text-* utilities per component */
 }
 
 h1 {

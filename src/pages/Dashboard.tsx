@@ -6,15 +6,14 @@ import type { Receipt } from '../lib/api';
 import { Card } from '../components/ui/Card';
 import { Badge } from '../components/ui/Badge';
 import { LoadingSpinner } from '../components/ui/LoadingSpinner';
-import { Upload, QrCode, History, ChevronRight } from 'lucide-react';
+import { Upload, QrCode, History, ChevronRight, CreditCard, Store } from 'lucide-react';
 
 export function Dashboard() {
-  const { user, refreshUser } = useAuth();
+  const { user } = useAuth();
   const [receipts, setReceipts] = useState<Receipt[]>([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    refreshUser();
     api.get('/receipts').then((res) => setReceipts(res.data)).finally(() => setLoading(false));
   }, []);
 
@@ -39,19 +38,35 @@ export function Dashboard() {
             <span className="font-medium text-gray-900">Upload Receipt</span>
           </Card>
         </Link>
+        <Link to="/cashout">
+          <Card className="flex h-full flex-col items-center justify-center gap-2 text-center hover:bg-gray-50">
+            <div className="flex h-10 w-10 items-center justify-center rounded-full bg-green-100 text-green-600">
+              <CreditCard size={20} />
+            </div>
+            <span className="font-medium text-gray-900">Cash Out</span>
+          </Card>
+        </Link>
+        <Link to="/dealers">
+          <Card className="flex h-full flex-col items-center justify-center gap-2 text-center hover:bg-gray-50">
+            <div className="flex h-10 w-10 items-center justify-center rounded-full bg-amber-100 text-amber-600">
+              <Store size={20} />
+            </div>
+            <span className="font-medium text-gray-900">Find Dealers</span>
+          </Card>
+        </Link>
         <Link to="/history">
           <Card className="flex h-full flex-col items-center justify-center gap-2 text-center hover:bg-gray-50">
             <div className="flex h-10 w-10 items-center justify-center rounded-full bg-purple-100 text-purple-600">
               <History size={20} />
             </div>
-            <span className="font-medium text-gray-900">Cashback History</span>
+            <span className="font-medium text-gray-900">History</span>
           </Card>
         </Link>
       </div>
 
       <div>
         <div className="mb-3 flex items-center justify-between">
-          <h2 className="text-lg font-bold text-gray-900">Recent Receipts</h2>
+          <h2 className="text-lg font-bold" style={{ color: '#111827' }}>Recent Receipts</h2>
           <Link to="/history" className="text-sm font-medium text-purple-600 hover:underline">
             View all
           </Link>

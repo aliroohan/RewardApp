@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useRef, useState, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { toast } from 'sonner';
 import { Html5QrcodeScanner } from 'html5-qrcode';
@@ -15,6 +15,37 @@ export function DealerScan() {
   const [isLoading, setIsLoading] = useState(false);
   const scannerRef = useRef<Html5QrcodeScanner | null>(null);
   const scannedRef = useRef(false);
+
+  const handleDecodedToken = useCallback(async (token: string) => {
+    setIsLoading(true);
+    try {
+      const res = await api.post<ScanCashoutResult>('/dealers/scan-cashout-token', { token });
+      navigate('/confirm', { state: res.data });
+    } catch (err: any) {
+      toast.error(err.response?.data?.error || 'Failed to scan QR code');
+      scannedRef.current = false;
+    } finally {
+      setIsLoading(false);
+    }
+  }, [navigate]);
+
+  const handleFileUpload = async (files: FileList | null) => {
+    const file = files?.[0];
+    if (!file) return;
+    setIsLoading(true);
+    try {
+      const formData = new FormData();
+      formData.append('image', file);
+      const res = await api.post<ScanCashoutResult>('/dealers/scan-cashout-qr', formData, {
+        headers: { 'Content-Type': 'multipart/form-data' },
+      });
+      navigate('/confirm', { state: res.data });
+    } catch (err: any) {
+      toast.error(err.response?.data?.error || 'Failed to scan QR code');
+    } finally {
+      setIsLoading(false);
+    }
+  };
 
   useEffect(() => {
     if (mode === 'camera') {
@@ -40,44 +71,7 @@ export function DealerScan() {
         scannerRef.current = null;
       }
     };
-  }, [mode]);
-
-  const handleFileUpload = async (files: FileList | null) => {
-    const file = files?.[0];
-    if (!file) return;
-    setIsLoading(true);
-    try {
-      const formData = new FormData();
-      formData.append('image', file);
-      const res = await api.post<ScanCashoutResult>('/dealers/scan-cashout-qr', formData, {
-        headers: { 'Content-Type': 'multipart/form-data' },
-      });
-      navigate('/confirm', { state: res.data });
-    } catch (err: any) {
-      toast.error(err.response?.data?.error || 'Failed to scan QR code');
-    } finally {
-      setIsLoading(false);
-    }
-  };
-
-  const handleDecodedToken = async (token: string) => {
-    setIsLoading(true);
-    try {
-      const blob = await fetch(token).then((r) => r.blob());
-      const file = new File([blob], 'qr.png', { type: blob.type || 'image/png' });
-      const formData = new FormData();
-      formData.append('image', file);
-      const res = await api.post<ScanCashoutResult>('/dealers/scan-cashout-qr', formData, {
-        headers: { 'Content-Type': 'multipart/form-data' },
-      });
-      navigate('/confirm', { state: res.data });
-    } catch (err: any) {
-      toast.error(err.response?.data?.error || 'Failed to scan QR code');
-      scannedRef.current = false;
-    } finally {
-      setIsLoading(false);
-    }
-  };
+  }, [mode, handleDecodedToken]);
 
   if (isLoading) {
     return (

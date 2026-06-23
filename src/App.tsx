@@ -8,6 +8,8 @@ import { ReceiptUpload } from './pages/ReceiptUpload';
 import { ReceiptQrUpload } from './pages/ReceiptQrUpload';
 import { CashbackQr } from './pages/CashbackQr';
 import { CashbackHistory } from './pages/CashbackHistory';
+import { Cashout } from './pages/Cashout';
+import { Dealers } from './pages/Dealers';
 import { DealerDashboard } from './pages/DealerDashboard';
 import { DealerScan } from './pages/DealerScan';
 import { DealerConfirm } from './pages/DealerConfirm';
@@ -57,6 +59,8 @@ function AppRoutes() {
         <Route path="/receipt/:receiptId/qr" element={<ReceiptQrUpload />} />
         <Route path="/receipt/:receiptId/cashback" element={<CashbackQr />} />
         <Route path="/history" element={<CashbackHistory />} />
+        <Route path="/cashout" element={<Cashout />} />
+        <Route path="/dealers" element={<Dealers />} />
         <Route path="*" element={<Navigate to="/" replace />} />
       </Route>
     </Routes>

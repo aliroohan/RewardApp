@@ -1,15 +1,17 @@
 import { Outlet, Link, useLocation } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
-import { Home, Upload, History, LogOut, QrCode } from 'lucide-react';
+import { Home, Upload, History, LogOut, QrCode, CreditCard, Store } from 'lucide-react';
 
 export function CustomerLayout() {
   const { user, logout } = useAuth();
   const location = useLocation();
 
   const nav = [
-    { path: '/', label: 'Home', icon: Home },
-    { path: '/receipt', label: 'Receipt', icon: Upload },
-    { path: '/history', label: 'History', icon: History },
+    { path: '/',         label: 'Home',     icon: Home },
+    { path: '/receipt',  label: 'Receipt',  icon: Upload },
+    { path: '/cashout',  label: 'Cashout',  icon: CreditCard },
+    { path: '/dealers',  label: 'Dealers',  icon: Store },
+    { path: '/history',  label: 'History',  icon: History },
   ];
 
   return (
@@ -20,7 +22,7 @@ export function CustomerLayout() {
             <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-purple-600 text-white">
               <QrCode size={18} />
             </div>
-            <h1 className="text-lg font-bold text-gray-900">RewardApp</h1>
+            <h1 className="text-lg font-bold" style={{ color: '#111827' }}>RewardApp</h1>
           </div>
           <div className="flex items-center gap-3">
             <div className="hidden text-right sm:block">
@@ -44,7 +46,7 @@ export function CustomerLayout() {
         </div>
       </main>
 
-      <nav className="sticky bottom-0 border-t bg-white px-4 py-2">
+      <nav className="sticky bottom-0 border-t bg-white px-2 py-2">
         <div className="mx-auto flex max-w-3xl justify-around">
           {nav.map((item) => {
             const Icon = item.icon;
@@ -53,7 +55,7 @@ export function CustomerLayout() {
               <Link
                 key={item.path}
                 to={item.path}
-                className={`flex flex-col items-center gap-1 rounded-lg px-3 py-2 text-xs font-medium ${
+                className={`flex flex-col items-center gap-1 rounded-lg px-2 py-2 text-xs font-medium transition-colors ${
                   active ? 'text-purple-600' : 'text-gray-500 hover:text-gray-700'
                 }`}
               >
