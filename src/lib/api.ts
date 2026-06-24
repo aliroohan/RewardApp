@@ -96,7 +96,6 @@ export interface CashoutRequest {
   cashAmount: number;
   currency: string;
   status: 'pending' | 'dealer_confirmed' | 'completed' | 'cancelled' | 'expired';
-  dealerCommissionPoints: number;
   source: 'manual' | 'receipt_qr';
   customerPoints: number;
   dealerPoints: number;
@@ -129,5 +128,4 @@ export interface ScanCashoutResult {
   customerPoints: number;
   dealerPoints: number;
   professionalPoints: number;
-  dealerCommissionPoints: number;
 }

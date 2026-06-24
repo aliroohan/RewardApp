@@ -30,7 +30,7 @@ export function DealerConfirm() {
     setIsConfirming(true);
     try {
       await api.post(`/cashouts/${data.cashoutRequestId}/dealer-confirm`);
-      toast.success('Cashback confirmed. Points transferred to your account.');
+      toast.success('Cashback completed. Points transferred to your account.');
       setConfirmed(true);
     } catch (err: any) {
       toast.error(err.response?.data?.error || 'Failed to confirm cashback');
@@ -43,7 +43,7 @@ export function DealerConfirm() {
     return (
       <Card className="py-12 text-center">
         <CheckCircle size={64} className="mx-auto mb-4 text-green-500" />
-        <h2 className="text-2xl font-bold text-gray-900">Cashback Confirmed</h2>
+        <h2 className="text-2xl font-bold text-gray-900">Cashback Completed</h2>
         <p className="mt-2 text-gray-500">You paid {data.cashbackAmount} {data.currency} to the customer.</p>
         <p className="mt-1 text-sm text-gray-500">
           Points earned: {data.customerPoints + data.dealerPoints} pts
@@ -100,10 +100,6 @@ export function DealerConfirm() {
           <div className="flex justify-between">
             <span className="text-gray-500">Professional points</span>
             <span className="font-medium text-gray-900">{data.professionalPoints} pts</span>
-          </div>
-          <div className="flex justify-between border-t pt-2">
-            <span className="text-gray-500">Your commission</span>
-            <span className="font-medium text-gray-900">{data.dealerCommissionPoints} pts</span>
           </div>
         </div>
       </Card>
