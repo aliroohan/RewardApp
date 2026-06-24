@@ -2,15 +2,19 @@ import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { toast } from 'sonner';
 import { api } from '../lib/api';
+import { useAuth } from '../context/AuthContext';
 import { Button } from '../components/ui/Button';
 import { Card } from '../components/ui/Card';
 import { FileUpload } from '../components/ui/FileUpload';
+import { Input } from '../components/ui/Input';
 import { Upload, X, Camera } from 'lucide-react';
 
 export function ReceiptUpload() {
   const [file, setFile] = useState<File | null>(null);
   const [preview, setPreview] = useState<string | null>(null);
+  const [referralCode, setReferralCode] = useState('');
   const [isLoading, setIsLoading] = useState(false);
+  const { user } = useAuth();
   const navigate = useNavigate();
 
   const handleFileSelect = (files: FileList | null) => {
@@ -26,6 +30,9 @@ export function ReceiptUpload() {
     try {
       const formData = new FormData();
       formData.append('image', file);
+      if (referralCode.trim()) {
+        formData.append('referralCode', referralCode.trim());
+      }
       const res = await api.post('/receipts', formData, {
         headers: { 'Content-Type': 'multipart/form-data' },
       });
@@ -53,6 +60,16 @@ export function ReceiptUpload() {
               alt="Receipt preview"
               className="max-h-80 w-full rounded-lg object-contain"
             />
+            {!user?.referredBy && (
+              <Input
+                label="Referral code (optional)"
+                placeholder="Enter a professional's referral code"
+                value={referralCode}
+                onChange={(e) => setReferralCode(e.target.value)}
+                autoCapitalize="off"
+                autoCorrect="off"
+              />
+            )}
             <div className="flex gap-3">
               <Button
                 variant="secondary"

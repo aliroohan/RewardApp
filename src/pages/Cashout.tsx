@@ -1,6 +1,8 @@
 import { useState, useEffect, useCallback } from 'react';
+import { Navigate } from 'react-router-dom';
 import { toast } from 'sonner';
 import { useAuth } from '../context/AuthContext';
+import { isProfessional } from '../lib/roles';
 import { api } from '../lib/api';
 import type { DealerProfile, CashoutRequest } from '../lib/api';
 import { Card } from '../components/ui/Card';
@@ -115,6 +117,7 @@ export function Cashout() {
   };
 
   if (!user) return null;
+  if (!isProfessional(user)) return <Navigate to="/" replace />;
 
   return (
     <div className="space-y-6">

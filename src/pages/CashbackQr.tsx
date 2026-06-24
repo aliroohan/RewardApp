@@ -1,8 +1,10 @@
 import { useEffect, useState, useCallback } from 'react';
 import { useParams } from 'react-router-dom';
 import { toast } from 'sonner';
+import { useAuth } from '../context/AuthContext';
 import { api } from '../lib/api';
 import type { Receipt } from '../lib/api';
+import { isProfessional } from '../lib/roles';
 import { Card } from '../components/ui/Card';
 import { Button } from '../components/ui/Button';
 import { Badge } from '../components/ui/Badge';
@@ -22,8 +24,10 @@ interface CashoutQrData {
 }
 
 export function CashbackQr() {
+  const { user } = useAuth();
   const { receiptId } = useParams<{ receiptId: string }>();
   const [receipt, setReceipt] = useState<Receipt | null>(null);
+  const showPoints = isProfessional(user);
   const [data, setData] = useState<CashoutQrData | null>(null);
   const [loading, setLoading] = useState(true);
 
@@ -95,21 +99,25 @@ export function CashbackQr() {
       </Card>
 
       <Card>
-        <h3 className="mb-3 font-semibold text-gray-900">Breakdown</h3>
+        <h3 className="mb-3 font-semibold text-gray-900">{showPoints ? 'Breakdown' : 'Status'}</h3>
         <div className="space-y-2 text-sm">
-          <div className="flex justify-between">
-            <span className="text-gray-500">Customer points value</span>
-            <span className="font-medium text-gray-900">{data?.customerPoints} pts</span>
-          </div>
-          <div className="flex justify-between">
-            <span className="text-gray-500">Dealer points</span>
-            <span className="font-medium text-gray-900">{data?.dealerPoints} pts</span>
-          </div>
-          <div className="flex justify-between">
-            <span className="text-gray-500">Professional points</span>
-            <span className="font-medium text-gray-900">{data?.professionalPoints} pts</span>
-          </div>
-          <div className="flex justify-between border-t pt-2">
+          {showPoints && (
+            <>
+              <div className="flex justify-between">
+                <span className="text-gray-500">Customer points value</span>
+                <span className="font-medium text-gray-900">{data?.customerPoints} pts</span>
+              </div>
+              <div className="flex justify-between">
+                <span className="text-gray-500">Dealer points</span>
+                <span className="font-medium text-gray-900">{data?.dealerPoints} pts</span>
+              </div>
+              <div className="flex justify-between">
+                <span className="text-gray-500">Professional points</span>
+                <span className="font-medium text-gray-900">{data?.professionalPoints} pts</span>
+              </div>
+            </>
+          )}
+          <div className={`flex justify-between ${showPoints ? 'border-t pt-2' : ''}`}>
             <span className="text-gray-500">Status</span>
             <Badge variant="warning">Pending dealer scan</Badge>
           </div>

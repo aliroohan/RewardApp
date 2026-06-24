@@ -3,9 +3,11 @@ import { useParams, useNavigate } from 'react-router-dom';
 import { toast } from 'sonner';
 import { api } from '../lib/api';
 import type { Receipt, QrImageClaimResult } from '../lib/api';
+import { useAuth } from '../context/AuthContext';
 import { Button } from '../components/ui/Button';
 import { Card } from '../components/ui/Card';
 import { FileUpload } from '../components/ui/FileUpload';
+import { Input } from '../components/ui/Input';
 import { Badge } from '../components/ui/Badge';
 import { LoadingSpinner } from '../components/ui/LoadingSpinner';
 import { X, QrCode, AlertCircle } from 'lucide-react';
@@ -13,9 +15,11 @@ import { X, QrCode, AlertCircle } from 'lucide-react';
 export function ReceiptQrUpload() {
   const { receiptId } = useParams<{ receiptId: string }>();
   const navigate = useNavigate();
+  const { user } = useAuth();
   const [receipt, setReceipt] = useState<Receipt | null>(null);
   const [files, setFiles] = useState<File[]>([]);
   const [previews, setPreviews] = useState<string[]>([]);
+  const [referralCode, setReferralCode] = useState('');
   const [result, setResult] = useState<QrImageClaimResult | null>(null);
   const [isLoading, setIsLoading] = useState(false);
   const [pageLoading, setPageLoading] = useState(true);
@@ -49,6 +53,9 @@ export function ReceiptQrUpload() {
     try {
       const formData = new FormData();
       files.forEach((f) => formData.append('images', f));
+      if (referralCode.trim()) {
+        formData.append('referralCode', referralCode.trim());
+      }
       const res = await api.post<QrImageClaimResult>(`/receipts/${receiptId}/qr-images`, formData, {
         headers: { 'Content-Type': 'multipart/form-data' },
       });
@@ -130,6 +137,17 @@ export function ReceiptQrUpload() {
                 <span className="text-xs text-gray-500">You can select multiple</span>
               </div>
             </FileUpload>
+
+            {!user?.referredBy && (
+              <Input
+                label="Referral code (optional)"
+                placeholder="Enter a professional's referral code"
+                value={referralCode}
+                onChange={(e) => setReferralCode(e.target.value)}
+                autoCapitalize="off"
+                autoCorrect="off"
+              />
+            )}
 
             <Button
               onClick={handleSubmit}

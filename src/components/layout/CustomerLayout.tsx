@@ -1,15 +1,17 @@
 import { Outlet, Link, useLocation } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
+import { isProfessional } from '../../lib/roles';
 import { Home, Upload, History, LogOut, QrCode, CreditCard, Store } from 'lucide-react';
 
 export function CustomerLayout() {
   const { user, logout } = useAuth();
   const location = useLocation();
+  const showPoints = isProfessional(user);
 
   const nav = [
     { path: '/',         label: 'Home',     icon: Home },
     { path: '/receipt',  label: 'Receipt',  icon: Upload },
-    { path: '/cashout',  label: 'Cashout',  icon: CreditCard },
+    ...(showPoints ? [{ path: '/cashout', label: 'Cashout', icon: CreditCard }] : []),
     { path: '/dealers',  label: 'Dealers',  icon: Store },
     { path: '/history',  label: 'History',  icon: History },
   ];
@@ -27,7 +29,9 @@ export function CustomerLayout() {
           <div className="flex items-center gap-3">
             <div className="hidden text-right sm:block">
               <p className="text-sm font-medium text-gray-900">{user?.name || user?.email}</p>
-              <p className="text-xs text-gray-500">{user?.pointsBalance.toLocaleString()} pts</p>
+              {showPoints && (
+                <p className="text-xs text-gray-500">{user?.pointsBalance.toLocaleString()} pts</p>
+              )}
             </div>
             <button
               onClick={logout}

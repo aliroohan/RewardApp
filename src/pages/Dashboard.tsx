@@ -3,6 +3,7 @@ import { Link } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import { api } from '../lib/api';
 import type { Receipt } from '../lib/api';
+import { isProfessional } from '../lib/roles';
 import { Card } from '../components/ui/Card';
 import { Badge } from '../components/ui/Badge';
 import { LoadingSpinner } from '../components/ui/LoadingSpinner';
@@ -12,6 +13,7 @@ export function Dashboard() {
   const { user } = useAuth();
   const [receipts, setReceipts] = useState<Receipt[]>([]);
   const [loading, setLoading] = useState(true);
+  const showPoints = isProfessional(user);
 
   useEffect(() => {
     api.get('/receipts').then((res) => setReceipts(res.data)).finally(() => setLoading(false));
@@ -19,15 +21,26 @@ export function Dashboard() {
 
   return (
     <div className="space-y-5">
-      <Card className="bg-gradient-to-br from-purple-600 to-purple-700 text-white">
-        <p className="text-sm text-purple-100">Available Points</p>
-        <p className="text-4xl font-extrabold">{user?.pointsBalance.toLocaleString() || 0}</p>
-        <p className="text-sm text-purple-100">Lifetime: {user?.lifetimePoints.toLocaleString() || 0}</p>
-        <div className="mt-4 flex gap-2">
-          <Badge variant="info">{user?.tier || 'Bronze'}</Badge>
-          <Badge variant="neutral">{user?.currency}</Badge>
-        </div>
-      </Card>
+      {showPoints ? (
+        <Card className="bg-gradient-to-br from-purple-600 to-purple-700 text-white">
+          <p className="text-sm text-purple-100">Available Points</p>
+          <p className="text-4xl font-extrabold">{user?.pointsBalance.toLocaleString() || 0}</p>
+          <p className="text-sm text-purple-100">Lifetime: {user?.lifetimePoints.toLocaleString() || 0}</p>
+          <div className="mt-4 flex gap-2">
+            <Badge variant="info">{user?.tier || 'Bronze'}</Badge>
+            <Badge variant="neutral">{user?.currency}</Badge>
+          </div>
+        </Card>
+      ) : (
+        <Card className="bg-gradient-to-br from-purple-600 to-purple-700 text-white">
+          <p className="text-sm text-purple-100">Welcome back</p>
+          <p className="text-2xl font-extrabold">{user?.name || user?.email?.split('@')[0]}</p>
+          <p className="mt-1 text-sm text-purple-100">Upload receipts to earn cashback at dealers</p>
+          <div className="mt-4">
+            <Badge variant="neutral">{user?.currency}</Badge>
+          </div>
+        </Card>
+      )}
 
       <div className="grid grid-cols-2 gap-4">
         <Link to="/receipt">
@@ -38,14 +51,16 @@ export function Dashboard() {
             <span className="font-medium text-gray-900">Upload Receipt</span>
           </Card>
         </Link>
-        <Link to="/cashout">
-          <Card className="flex h-full flex-col items-center justify-center gap-2 text-center hover:bg-gray-50">
-            <div className="flex h-10 w-10 items-center justify-center rounded-full bg-green-100 text-green-600">
-              <CreditCard size={20} />
-            </div>
-            <span className="font-medium text-gray-900">Cash Out</span>
-          </Card>
-        </Link>
+        {showPoints && (
+          <Link to="/cashout">
+            <Card className="flex h-full flex-col items-center justify-center gap-2 text-center hover:bg-gray-50">
+              <div className="flex h-10 w-10 items-center justify-center rounded-full bg-green-100 text-green-600">
+                <CreditCard size={20} />
+              </div>
+              <span className="font-medium text-gray-900">Cash Out</span>
+            </Card>
+          </Link>
+        )}
         <Link to="/dealers">
           <Card className="flex h-full flex-col items-center justify-center gap-2 text-center hover:bg-gray-50">
             <div className="flex h-10 w-10 items-center justify-center rounded-full bg-amber-100 text-amber-600">
