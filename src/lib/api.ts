@@ -38,7 +38,7 @@ export interface User {
   province?: string;
   preferredStore?: string;
   fcmToken?: string;
-  referredBy?: string;
+  referredBy?: string | { _id: string };
 }
 
 export interface DealerProfile {

@@ -2,7 +2,6 @@ import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { toast } from 'sonner';
 import { api } from '../lib/api';
-import { useAuth } from '../context/AuthContext';
 import { Button } from '../components/ui/Button';
 import { Card } from '../components/ui/Card';
 import { FileUpload } from '../components/ui/FileUpload';
@@ -14,7 +13,6 @@ export function ReceiptUpload() {
   const [preview, setPreview] = useState<string | null>(null);
   const [referralCode, setReferralCode] = useState('');
   const [isLoading, setIsLoading] = useState(false);
-  const { user } = useAuth();
   const navigate = useNavigate();
 
   const handleFileSelect = (files: FileList | null) => {
@@ -53,6 +51,20 @@ export function ReceiptUpload() {
       </div>
 
       <Card>
+        <Input
+          label="Referral code (optional)"
+          placeholder="Enter a professional's referral code"
+          value={referralCode}
+          onChange={(e) => setReferralCode(e.target.value)}
+          autoCapitalize="off"
+          autoCorrect="off"
+        />
+        <p className="mt-2 text-xs text-gray-500">
+          Have a code from a professional? Enter it here before submitting your receipt.
+        </p>
+      </Card>
+
+      <Card>
         {preview ? (
           <div className="space-y-4">
             <img
@@ -60,16 +72,6 @@ export function ReceiptUpload() {
               alt="Receipt preview"
               className="max-h-80 w-full rounded-lg object-contain"
             />
-            {!user?.referredBy && (
-              <Input
-                label="Referral code (optional)"
-                placeholder="Enter a professional's referral code"
-                value={referralCode}
-                onChange={(e) => setReferralCode(e.target.value)}
-                autoCapitalize="off"
-                autoCorrect="off"
-              />
-            )}
             <div className="flex gap-3">
               <Button
                 variant="secondary"

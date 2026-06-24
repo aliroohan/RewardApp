@@ -3,7 +3,6 @@ import { useParams, useNavigate } from 'react-router-dom';
 import { toast } from 'sonner';
 import { api } from '../lib/api';
 import type { Receipt, QrImageClaimResult } from '../lib/api';
-import { useAuth } from '../context/AuthContext';
 import { Button } from '../components/ui/Button';
 import { Card } from '../components/ui/Card';
 import { FileUpload } from '../components/ui/FileUpload';
@@ -15,7 +14,6 @@ import { X, QrCode, AlertCircle } from 'lucide-react';
 export function ReceiptQrUpload() {
   const { receiptId } = useParams<{ receiptId: string }>();
   const navigate = useNavigate();
-  const { user } = useAuth();
   const [receipt, setReceipt] = useState<Receipt | null>(null);
   const [files, setFiles] = useState<File[]>([]);
   const [previews, setPreviews] = useState<string[]>([]);
@@ -138,16 +136,14 @@ export function ReceiptQrUpload() {
               </div>
             </FileUpload>
 
-            {!user?.referredBy && (
-              <Input
-                label="Referral code (optional)"
-                placeholder="Enter a professional's referral code"
-                value={referralCode}
-                onChange={(e) => setReferralCode(e.target.value)}
-                autoCapitalize="off"
-                autoCorrect="off"
-              />
-            )}
+            <Input
+              label="Referral code (optional)"
+              placeholder="Enter a professional's referral code"
+              value={referralCode}
+              onChange={(e) => setReferralCode(e.target.value)}
+              autoCapitalize="off"
+              autoCorrect="off"
+            />
 
             <Button
               onClick={handleSubmit}
