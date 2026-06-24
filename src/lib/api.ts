@@ -96,11 +96,20 @@ export interface CashoutRequest {
   cashAmount: number;
   currency: string;
   status: 'pending' | 'dealer_confirmed' | 'completed' | 'cancelled' | 'expired';
-  source: 'manual' | 'receipt_qr';
+  source: 'manual' | 'receipt_qr' | 'professional_qr';
+  cashoutQrUrl?: string;
   customerPoints: number;
   dealerPoints: number;
   professionalPoints: number;
   createdAt: string;
+}
+
+export interface ProfessionalCashoutQrData {
+  cashoutQrUrl: string;
+  cashoutRequestId: string;
+  cashAmount: number;
+  currency: string;
+  pointsAmount: number;
 }
 
 export interface QrImageClaimResult {
@@ -121,10 +130,12 @@ export interface QrImageClaimResult {
 
 export interface ScanCashoutResult {
   cashoutRequestId: string;
+  source?: 'manual' | 'receipt_qr' | 'professional_qr';
   customer: User;
   receipt?: Receipt;
   cashbackAmount: number;
   currency: string;
+  pointsAmount?: number;
   customerPoints: number;
   dealerPoints: number;
   professionalPoints: number;

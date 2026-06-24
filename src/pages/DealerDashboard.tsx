@@ -2,7 +2,7 @@ import { Link } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import { Card } from '../components/ui/Card';
 import { Button } from '../components/ui/Button';
-import { ScanLine, Wallet, QrCode } from 'lucide-react';
+import { ScanLine, History } from 'lucide-react';
 
 export function DealerDashboard() {
   const { user } = useAuth();
@@ -28,18 +28,17 @@ export function DealerDashboard() {
         </Card>
       </Link>
 
-      <div className="grid grid-cols-2 gap-4">
-        <Card className="text-center">
-          <Wallet size={24} className="mx-auto mb-2 text-purple-600" />
-          <p className="text-sm font-medium text-gray-900">Redeem Points</p>
-          <p className="text-xs text-gray-500">Convert points to B2B discounts</p>
+      <Link to="/history">
+        <Card className="flex items-center gap-4 hover:bg-gray-50">
+          <div className="flex h-14 w-14 items-center justify-center rounded-full bg-purple-100 text-purple-600">
+            <History size={28} />
+          </div>
+          <div className="flex-1">
+            <h3 className="text-lg font-semibold text-gray-900">Scan History</h3>
+            <p className="text-sm text-gray-500">View past cashback confirmations</p>
+          </div>
         </Card>
-        <Card className="text-center">
-          <QrCode size={24} className="mx-auto mb-2 text-purple-600" />
-          <p className="text-sm font-medium text-gray-900">History</p>
-          <p className="text-xs text-gray-500">View past cashback confirmations</p>
-        </Card>
-      </div>
+      </Link>
     </div>
   );
 }

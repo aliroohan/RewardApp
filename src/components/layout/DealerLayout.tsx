@@ -1,6 +1,6 @@
 import { Outlet, Link, useLocation } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
-import { LayoutDashboard, ScanLine, LogOut } from 'lucide-react';
+import { LayoutDashboard, ScanLine, History, LogOut } from 'lucide-react';
 
 export function DealerLayout() {
   const { user, logout } = useAuth();
@@ -9,6 +9,7 @@ export function DealerLayout() {
   const nav = [
     { path: '/', label: 'Dashboard', icon: LayoutDashboard },
     { path: '/scan', label: 'Scan QR', icon: ScanLine },
+    { path: '/history', label: 'History', icon: History },
   ];
 
   return (

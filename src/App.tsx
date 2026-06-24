@@ -13,6 +13,7 @@ import { Dealers } from './pages/Dealers';
 import { DealerDashboard } from './pages/DealerDashboard';
 import { DealerScan } from './pages/DealerScan';
 import { DealerConfirm } from './pages/DealerConfirm';
+import { DealerHistory } from './pages/DealerHistory';
 import { CustomerLayout } from './components/layout/CustomerLayout';
 import { DealerLayout } from './components/layout/DealerLayout';
 import { LoadingSpinner } from './components/ui/LoadingSpinner';
@@ -44,6 +45,7 @@ function AppRoutes() {
         <Route element={<DealerLayout />}>
           <Route path="/" element={<DealerDashboard />} />
           <Route path="/scan" element={<DealerScan />} />
+          <Route path="/history" element={<DealerHistory />} />
           <Route path="/confirm" element={<DealerConfirm />} />
           <Route path="*" element={<Navigate to="/" replace />} />
         </Route>

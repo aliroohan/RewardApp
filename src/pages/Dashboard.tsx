@@ -7,13 +7,23 @@ import { isProfessional } from '../lib/roles';
 import { Card } from '../components/ui/Card';
 import { Badge } from '../components/ui/Badge';
 import { LoadingSpinner } from '../components/ui/LoadingSpinner';
-import { Upload, QrCode, History, ChevronRight, CreditCard, Store } from 'lucide-react';
+import { Upload, QrCode, History, ChevronRight, CreditCard, Store, Copy, Check } from 'lucide-react';
+import { toast } from 'sonner';
 
 export function Dashboard() {
   const { user } = useAuth();
   const [receipts, setReceipts] = useState<Receipt[]>([]);
   const [loading, setLoading] = useState(true);
+  const [copied, setCopied] = useState(false);
   const showPoints = isProfessional(user);
+
+  const copyReferralCode = async () => {
+    if (!user?.referralCode) return;
+    await navigator.clipboard.writeText(user.referralCode);
+    setCopied(true);
+    toast.success('Referral code copied');
+    setTimeout(() => setCopied(false), 2000);
+  };
 
   useEffect(() => {
     api.get('/receipts').then((res) => setReceipts(res.data)).finally(() => setLoading(false));
@@ -26,10 +36,27 @@ export function Dashboard() {
           <p className="text-sm text-purple-100">Available Points</p>
           <p className="text-4xl font-extrabold">{user?.pointsBalance.toLocaleString() || 0}</p>
           <p className="text-sm text-purple-100">Lifetime: {user?.lifetimePoints.toLocaleString() || 0}</p>
-          <div className="mt-4 flex gap-2">
+          <div className="mt-4 flex flex-wrap gap-2">
             <Badge variant="info">{user?.tier || 'Bronze'}</Badge>
             <Badge variant="neutral">{user?.currency}</Badge>
           </div>
+          {user?.referralCode && (
+            <div className="mt-4 rounded-lg bg-white/10 p-3">
+              <p className="text-xs text-purple-100">Your referral code</p>
+              <div className="mt-1 flex items-center justify-between gap-2">
+                <code className="text-lg font-bold tracking-wide">{user.referralCode}</code>
+                <button
+                  type="button"
+                  onClick={copyReferralCode}
+                  className="rounded-md bg-white/20 p-2 hover:bg-white/30"
+                  aria-label="Copy referral code"
+                >
+                  {copied ? <Check size={16} /> : <Copy size={16} />}
+                </button>
+              </div>
+              <p className="mt-1 text-xs text-purple-100">Share with customers when they upload receipts</p>
+            </div>
+          )}
         </Card>
       ) : (
         <Card className="bg-gradient-to-br from-purple-600 to-purple-700 text-white">
