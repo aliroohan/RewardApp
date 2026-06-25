@@ -19,6 +19,14 @@ const STATUS_VARIANTS: Record<string, 'warning' | 'info' | 'success' | 'danger' 
   expired:          'neutral',
 };
 
+const STATUS_LABELS: Record<string, string> = {
+  pending: 'Pending dealer scan',
+  dealer_confirmed: 'Dealer confirmed',
+  completed: 'Cashout completed',
+  cancelled: 'Cancelled',
+  expired: 'Expired',
+};
+
 export function Cashout() {
   const { user, refreshUser } = useAuth();
 
@@ -46,6 +54,14 @@ export function Cashout() {
   useEffect(() => {
     loadHistory();
   }, [loadHistory]);
+
+  useEffect(() => {
+    if (step !== 2 || !qrData) return;
+    const current = cashouts.find((c) => c._id === qrData.cashoutRequestId);
+    if (current?.status !== 'pending') return;
+    const interval = setInterval(loadHistory, 5000);
+    return () => clearInterval(interval);
+  }, [step, qrData, cashouts, loadHistory]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -119,6 +135,12 @@ export function Cashout() {
   if (!user) return null;
   if (!isProfessional(user)) return <Navigate to="/" replace />;
 
+  const activeCashout = qrData
+    ? cashouts.find((c) => c._id === qrData.cashoutRequestId)
+    : undefined;
+  const qrStatus = activeCashout?.status ?? qrData?.status ?? 'pending';
+  const qrCompleted = qrStatus === 'completed';
+
   return (
     <div className="space-y-6">
       <div className="relative overflow-hidden rounded-2xl bg-gradient-to-br from-purple-600 to-purple-800 p-6 text-white shadow-lg">
@@ -158,19 +180,30 @@ export function Cashout() {
       {step === 2 && qrData && (
         <div className="space-y-4">
           <Card className="text-center border-purple-200 bg-purple-50">
-            <h2 className="text-xl font-extrabold text-gray-900">Your Cashout QR</h2>
-            <p className="mt-1 text-sm text-gray-500">Show this QR code to a dealer to receive cash</p>
+            <h2 className="text-xl font-extrabold text-gray-900">
+              {qrCompleted ? 'Cashout Completed' : 'Your Cashout QR'}
+            </h2>
+            <p className="mt-1 text-sm text-gray-500">
+              {qrCompleted
+                ? 'Your dealer has confirmed this cashout.'
+                : 'Show this QR code to a dealer to receive cash'}
+            </p>
             <div className="mx-auto mt-4 inline-block rounded-2xl border-4 border-purple-100 bg-white p-3">
               <img
                 src={qrData.cashoutQrUrl}
                 alt="Cashout QR Code"
-                className="h-64 w-64 object-contain"
+                className={`h-64 w-64 object-contain ${qrCompleted ? 'opacity-60' : ''}`}
               />
             </div>
             <h3 className="mt-4 text-3xl font-extrabold text-purple-600">
               {qrData.cashAmount} {qrData.currency}
             </h3>
             <p className="text-sm text-gray-500">{qrData.pointsAmount.toLocaleString()} points</p>
+            <div className="mt-3 flex justify-center">
+              <Badge variant={STATUS_VARIANTS[qrStatus] ?? 'neutral'}>
+                {STATUS_LABELS[qrStatus] ?? qrStatus.replace(/_/g, ' ')}
+              </Badge>
+            </div>
             <Button variant="outline" className="mt-4 w-full" onClick={handleDownload}>
               <Download size={18} className="mr-2" /> Save QR Code
             </Button>
@@ -198,7 +231,7 @@ export function Cashout() {
                     💸 {c.pointsAmount.toLocaleString()} pts
                   </span>
                   <Badge variant={STATUS_VARIANTS[c.status] ?? 'neutral'}>
-                    {c.status.replace(/_/g, ' ')}
+                    {STATUS_LABELS[c.status] ?? c.status.replace(/_/g, ' ')}
                   </Badge>
                 </div>
                 <p className="text-xs text-gray-400">

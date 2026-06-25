@@ -3,13 +3,29 @@ import { useParams } from 'react-router-dom';
 import { toast } from 'sonner';
 import { useAuth } from '../context/AuthContext';
 import { api } from '../lib/api';
-import type { Receipt } from '../lib/api';
+import type { CashoutRequest, Receipt } from '../lib/api';
 import { isProfessional } from '../lib/roles';
 import { Card } from '../components/ui/Card';
 import { Button } from '../components/ui/Button';
 import { Badge } from '../components/ui/Badge';
 import { LoadingSpinner } from '../components/ui/LoadingSpinner';
-import { Download, Clock } from 'lucide-react';
+import { Download, Clock, CheckCircle2 } from 'lucide-react';
+
+const STATUS_VARIANTS: Record<string, 'warning' | 'info' | 'success' | 'danger' | 'neutral'> = {
+  pending: 'warning',
+  dealer_confirmed: 'info',
+  completed: 'success',
+  cancelled: 'danger',
+  expired: 'neutral',
+};
+
+const STATUS_LABELS: Record<string, string> = {
+  pending: 'Pending dealer scan',
+  dealer_confirmed: 'Dealer confirmed',
+  completed: 'Cashback completed',
+  cancelled: 'Cancelled',
+  expired: 'Expired',
+};
 
 interface CashoutQrData {
   cashoutQrUrl: string;
@@ -19,6 +35,8 @@ interface CashoutQrData {
   customerPoints: number;
   dealerPoints: number;
   professionalPoints: number;
+  status?: CashoutRequest['status'];
+  completedAt?: string;
   pendingApproval?: boolean;
   message?: string;
 }
@@ -51,6 +69,12 @@ export function CashbackQr() {
     fetchData();
   }, [fetchData]);
 
+  useEffect(() => {
+    if (data?.status !== 'pending') return;
+    const interval = setInterval(fetchData, 5000);
+    return () => clearInterval(interval);
+  }, [data?.status, fetchData]);
+
   const handleDownload = () => {
     if (!data?.cashoutQrUrl) return;
     const link = document.createElement('a');
@@ -59,6 +83,9 @@ export function CashbackQr() {
     link.target = '_blank';
     link.click();
   };
+
+  const status = data?.status || 'pending';
+  const isCompleted = status === 'completed';
 
   if (loading) return <LoadingSpinner className="py-10" />;
 
@@ -77,16 +104,35 @@ export function CashbackQr() {
   return (
     <div className="space-y-5">
       <div>
-        <h1 className="text-2xl font-bold text-gray-900">Your Cashback QR</h1>
-        <p className="text-sm text-gray-500">Show this QR code to an approved dealer to receive cashback</p>
+        <h1 className="text-2xl font-bold text-gray-900">
+          {isCompleted ? 'Cashback Received' : 'Your Cashback QR'}
+        </h1>
+        <p className="text-sm text-gray-500">
+          {isCompleted
+            ? 'Your dealer has confirmed this cashback.'
+            : 'Show this QR code to an approved dealer to receive cashback'}
+        </p>
       </div>
+
+      {isCompleted && (
+        <Card className="flex items-center gap-3 border-green-200 bg-green-50 py-4">
+          <CheckCircle2 size={28} className="shrink-0 text-green-600" />
+          <div>
+            <p className="font-semibold text-green-900">Cashback completed</p>
+            <p className="text-sm text-green-700">
+              {data.cashbackAmount} {data.currency} received
+              {data.completedAt && ` on ${new Date(data.completedAt).toLocaleDateString()}`}
+            </p>
+          </div>
+        </Card>
+      )}
 
       <Card className="text-center">
         <div className="mb-4 inline-block rounded-2xl border-4 border-purple-100 bg-white p-3">
           <img
             src={data?.cashoutQrUrl}
             alt="Cashback QR Code"
-            className="h-64 w-64 object-contain"
+            className={`h-64 w-64 object-contain ${isCompleted ? 'opacity-60' : ''}`}
           />
         </div>
         <h2 className="text-3xl font-extrabold text-purple-600">
@@ -119,7 +165,9 @@ export function CashbackQr() {
           )}
           <div className={`flex justify-between ${showPoints ? 'border-t pt-2' : ''}`}>
             <span className="text-gray-500">Status</span>
-            <Badge variant="warning">Pending dealer scan</Badge>
+            <Badge variant={STATUS_VARIANTS[status] ?? 'neutral'}>
+              {STATUS_LABELS[status] ?? status.replace(/_/g, ' ')}
+            </Badge>
           </div>
         </div>
       </Card>

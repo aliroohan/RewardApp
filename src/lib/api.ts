@@ -110,6 +110,7 @@ export interface ProfessionalCashoutQrData {
   cashAmount: number;
   currency: string;
   pointsAmount: number;
+  status?: CashoutRequest['status'];
 }
 
 export interface QrImageClaimResult {
